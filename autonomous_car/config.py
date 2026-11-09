@@ -17,6 +17,8 @@ class SimulationConfig:
     braking_rate: float = 260.0
     drag: float = 0.985
     steering_rate: float = 2.4
+    boundary_margin: float = 45.0
+    boundary_steering_strength: float = 0.8
     sensor_range: float = 260.0
     sensor_angles: Tuple[float, ...] = (-0.85, -0.42, 0.0, 0.42, 0.85)
     episode_seconds: float = 25.0

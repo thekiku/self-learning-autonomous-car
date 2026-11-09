@@ -17,6 +17,12 @@ class Car:
     def update(self, steering: float, acceleration: float, dt: float, config) -> None:
         acceleration = float(np.clip(acceleration, -1.0, 1.0))
         steering = float(np.clip(steering, -1.0, 1.0))
+        left_limit = config.road_left + config.boundary_margin
+        right_limit = config.road_right - config.boundary_margin
+        if self.x < left_limit:
+            steering = max(steering, config.boundary_steering_strength)
+        elif self.x > right_limit:
+            steering = min(steering, -config.boundary_steering_strength)
         if acceleration >= 0.0:
             self.speed += acceleration * config.acceleration_rate * dt
         else:
@@ -26,6 +32,8 @@ class Car:
         self.heading = float(np.clip(self.heading, -0.55, 0.55))
         self.x += np.sin(self.heading) * self.speed * dt
         self.y -= np.cos(self.heading) * self.speed * dt
+        self.x = float(np.clip(self.x, config.road_left + self.width / 2.0,
+                               config.road_right - self.width / 2.0))
 
     def bounds(self) -> tuple[float, float, float, float]:
         half_w, half_l = self.width / 2.0, self.length / 2.0

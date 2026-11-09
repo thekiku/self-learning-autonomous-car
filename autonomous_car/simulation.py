@@ -23,6 +23,7 @@ class EvolutionTrainer:
             config.population_size, config.elite_count, config.tournament_size,
             config.mutation_rate, config.mutation_scale, network_factory, self.rng,
         )
+        self.ga.seed_safe_individual()
 
     def evaluate(self, individual) -> float:
         network = NeuralNetwork(
@@ -58,14 +59,15 @@ class EvolutionTrainer:
             len(self.config.sensor_angles) + 1, self.config.hidden_layers, 2,
             self.rng, genome=genome,
         )
-        observation = self.environment.reset()
         try:
-            while not self.environment.done:
-                for event in renderer.pygame.event.get():
-                    if event.type == renderer.pygame.QUIT:
-                        return
-                observation, _, _ = self.environment.step(network.predict(observation))
-                renderer.draw(self.environment)
-                renderer.clock.tick(60)
+            while True:
+                observation = self.environment.reset()
+                while not self.environment.done:
+                    for event in renderer.pygame.event.get():
+                        if event.type == renderer.pygame.QUIT:
+                            return
+                    observation, _, _ = self.environment.step(network.predict(observation))
+                    renderer.draw(self.environment)
+                    renderer.clock.tick(60)
         finally:
             renderer.close()

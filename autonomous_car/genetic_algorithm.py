@@ -59,6 +59,15 @@ class GeneticAlgorithm:
         genome[mask] += self.rng.normal(0.0, self.mutation_scale, mask.sum())
         return genome
 
+    def seed_safe_individual(self) -> None:
+        """Insert a straight, accelerating policy to anchor early evolution."""
+        network = self.network_factory()
+        for layer in network.layers:
+            layer.weights.fill(0.0)
+            layer.bias.fill(0.0)
+        network.layers[-1].bias[1] = 1.5
+        self.population[0] = Individual(network.genome())
+
     def evolve(self) -> Individual:
         ranked = self.ranked()
         next_population = [Individual(item.genome.copy()) for item in ranked[: self.elite_count]]

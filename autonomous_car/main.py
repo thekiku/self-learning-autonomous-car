@@ -18,6 +18,7 @@ def main() -> None:
     trainer = EvolutionTrainer(config, seed=args.seed)
     trainer.train(args.generations)
     if args.watch and not args.headless and trainer.best_genome is not None:
+        print("Training complete. Opening Pygame frontend; close its window to stop.")
         trainer.watch(trainer.best_genome)
 
 

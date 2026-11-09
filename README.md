@@ -42,11 +42,17 @@ This trains first, then opens the animated frontend:
 python -m autonomous_car.main --population 80 --generations 100 --watch
 ```
 
-The terminal prints each generation's fitness. After training completes, the
-Pygame window displays the best policy. The window shows the highway,
+Use this command by itself; do not add `--headless`. The terminal prints each
+generation's fitness first. After training completes, it prints
+`Training complete. Opening Pygame frontend` and opens a separate window. The
+Pygame window shows the highway,
 randomized traffic, learned car, raycast sensors, speed, distance, and episode
 time. The playback loops through new randomized episodes until the window is
 closed.
+
+If the window is not immediately visible, use `Alt+Tab` or check the Windows
+taskbar for **Neuroevolution Autonomous Car**. The window opens only after all
+requested generations finish.
 
 ### 3. Watch quickly while developing
 
@@ -58,6 +64,12 @@ python -m autonomous_car.main --population 20 --generations 10 --watch
 
 This is useful for checking the animation, but larger populations and more
 generations generally produce better driving behavior.
+
+For an immediate frontend test, use one population and one generation:
+
+```powershell
+python -m autonomous_car.main --population 2 --generations 1 --watch
+```
 
 ### 4. Stop the frontend
 
