@@ -12,9 +12,11 @@ class Car:
     width: float
     length: float
     speed: float = 0.0
-    heading: float = -np.pi / 2.0
+    lateral_velocity: float = 0.0
+    heading: float = 0.0
 
     def update(self, steering: float, acceleration: float, dt: float, config) -> None:
+        """Advance the car with damped lateral control and longitudinal motion."""
         acceleration = float(np.clip(acceleration, -1.0, 1.0))
         steering = float(np.clip(steering, -1.0, 1.0))
         left_limit = config.road_left + config.boundary_margin
@@ -28,10 +30,21 @@ class Car:
         else:
             self.speed += acceleration * config.braking_rate * dt
         self.speed = float(np.clip(self.speed * config.drag ** (dt * 60.0), 0.0, config.max_speed))
-        self.heading += steering * config.steering_rate * dt
-        self.heading = float(np.clip(self.heading, -0.55, 0.55))
-        self.x += np.sin(self.heading) * self.speed * dt
+        # Steering specifies a desired lateral velocity. A first-order response
+        # prevents policy noise from integrating into an irreversible turn.
+        desired_lateral_velocity = steering * config.lateral_speed
+        response = 1.0 - np.exp(-config.lateral_response * dt)
+        self.lateral_velocity += (
+            desired_lateral_velocity - self.lateral_velocity
+        ) * response
+        self.x += self.lateral_velocity * dt
         self.y -= np.cos(self.heading) * self.speed * dt
+        # Heading is visual attitude only; forward travel remains aligned with
+        # the highway so steering cannot create a runaway circular trajectory.
+        self.heading = float(
+            np.clip(self.lateral_velocity / config.lateral_speed, -1.0, 1.0)
+            * config.max_heading
+        )
         self.x = float(np.clip(self.x, config.road_left + self.width / 2.0,
                                config.road_right - self.width / 2.0))
 

@@ -18,6 +18,7 @@ class DrivingEnvironment:
         self.elapsed = 0.0
         self.distance = 0.0
         self.done = False
+        self.last_steering = 0.0
 
     def reset(self) -> np.ndarray:
         self.player = Car(
@@ -27,6 +28,7 @@ class DrivingEnvironment:
         self.traffic.reset(self.player.y)
         self.elapsed = self.distance = 0.0
         self.done = False
+        self.last_steering = 0.0
         return self.observation()
 
     def observation(self) -> np.ndarray:
@@ -36,14 +38,21 @@ class DrivingEnvironment:
         if self.done:
             raise RuntimeError("Cannot step a terminated episode; call reset first.")
         previous_y = self.player.y
-        self.player.update(action[0], action[1], dt, self.config)
+        steering = float(np.clip(action[0], -1.0, 1.0))
+        acceleration = float(np.clip(action[1], -1.0, 1.0))
+        self.player.update(steering, acceleration, dt, self.config)
         self.traffic.update(dt, self.player.y)
         self.elapsed += dt
         self.distance += previous_y - self.player.y
         collision = any(rectangles_overlap(self.player, npc) for npc in self.traffic.cars)
         outside = not (self.config.road_left <= self.player.x <= self.config.road_right)
         self.done = collision or outside or self.elapsed >= self.config.episode_seconds
-        reward = (previous_y - self.player.y) * 0.05
+        forward_reward = (previous_y - self.player.y) * 0.05
+        survival_reward = 0.10 * dt
+        steering_cost = 0.01 * abs(steering) * dt
+        steering_change_cost = 0.03 * abs(steering - self.last_steering) * dt
+        reward = forward_reward + survival_reward - steering_cost - steering_change_cost
+        self.last_steering = steering
         if collision:
             reward -= 100.0
         if outside:

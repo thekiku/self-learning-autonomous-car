@@ -50,10 +50,6 @@ randomized traffic, learned car, raycast sensors, speed, distance, and episode
 time. The playback loops through new randomized episodes until the window is
 closed.
 
-If the window is not immediately visible, use `Alt+Tab` or check the Windows
-taskbar for **Neuroevolution Autonomous Car**. The window opens only after all
-requested generations finish.
-
 ### 3. Watch quickly while developing
 
 Use a small run to open the frontend sooner:

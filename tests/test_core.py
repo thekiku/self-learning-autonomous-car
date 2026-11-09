@@ -3,6 +3,7 @@ import numpy as np
 from autonomous_car.config import SimulationConfig
 from autonomous_car.environment import DrivingEnvironment
 from autonomous_car.neural_network import NeuralNetwork
+from autonomous_car.physics import Car
 
 
 def test_network_output_is_bounded():
@@ -20,3 +21,13 @@ def test_environment_step_returns_valid_observation():
     assert next_observation.shape == (6,)
     assert isinstance(reward, float)
     assert isinstance(done, bool)
+
+
+def test_straight_action_does_not_oscillate():
+    config = SimulationConfig(traffic_count=0)
+    car = Car(config.screen_width / 2, 480, config.car_width, config.car_length)
+    positions = []
+    for _ in range(120):
+        car.update(0.0, 1.0, 1.0 / 30.0, config)
+        positions.append(car.x)
+    assert max(positions) - min(positions) < 1e-6

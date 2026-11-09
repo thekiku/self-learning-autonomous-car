@@ -40,6 +40,7 @@ class GeneticAlgorithm:
         )
 
     def ranked(self) -> list[Individual]:
+        """Return individuals ordered from highest to lowest measured fitness."""
         return sorted(self.population, key=lambda item: item.fitness, reverse=True)
 
     def _select_parent(self) -> Individual:
@@ -69,7 +70,10 @@ class GeneticAlgorithm:
         self.population[0] = Individual(network.genome())
 
     def evolve(self) -> Individual:
+        """Create the next generation while preserving the current champion."""
         ranked = self.ranked()
+        # Elitism prevents the best policy from being lost by stochastic
+        # crossover or mutation.
         next_population = [Individual(item.genome.copy()) for item in ranked[: self.elite_count]]
         while len(next_population) < self.population_size:
             first = self._select_parent().genome

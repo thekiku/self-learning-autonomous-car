@@ -30,6 +30,8 @@ class NeuralNetwork:
         sizes = [input_size, *hidden_sizes, output_size]
         self.layers: List[DenseLayer] = []
         for fan_in, fan_out in zip(sizes[:-1], sizes[1:]):
+            # Xavier uniform initialization keeps the variance of activations
+            # approximately stable across layers before evolution begins.
             limit = np.sqrt(6.0 / (fan_in + fan_out))
             self.layers.append(
                 DenseLayer(
@@ -52,6 +54,8 @@ class NeuralNetwork:
 
     def genome(self) -> np.ndarray:
         """Serialize all parameters into one contiguous vector."""
+        # A flat representation lets genetic operators treat every weight and
+        # bias as a gene while preserving deterministic layer reconstruction.
         return np.concatenate(
             [part.ravel() for layer in self.layers for part in (layer.weights, layer.bias)]
         )
